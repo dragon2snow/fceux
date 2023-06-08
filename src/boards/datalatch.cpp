@@ -575,3 +575,69 @@ static void BMC11160Sync(void) {
 void BMC11160_Init(CartInfo *info) {
 	Latch_Init(info, BMC11160Sync, 0, 0x8000, 0xFFFF, 0, 0);
 }
+
+
+//------------------ Akerasoft NROM3XX /Mapper 474 ---------------------------
+// Simple Akerasoft NROM3XX
+
+static readfunc defapuread[0x1000];
+static uint8 subMapper = 0;
+static DECLFR(M474ReadCart) {
+	if (subMapper == 0)
+	{
+		return Page[A >> 11][A];
+	}
+	else
+	{
+		if (A < 0x4800)
+		{
+			return defapuread[A - 0x4000](A);
+		}
+		else
+		{
+			return Page[A >> 11][A];
+		}
+	}
+
+}
+
+static void M474Sync(void) {
+	setchr8(0);
+	setprg16(0x4000, 0);
+	setprg16(0x8000, 1);
+	setprg16(0xC000, 2);
+
+}
+
+
+static void M474Power(void) {
+	//  16 bytes: Header.PRG ROM size must be 3. Trainer and battery are forbidden; NES 2.0 PRG RAM size must be 0.
+	//	2048 bytes: Ignored.
+	//	47104 bytes : PRG ROM mapped to $4800 - $FFFF.
+	//  49119 bytes : PRG ROM mapped to $4020 - $FFFF.
+	//	8192¡Án bytes : CHR ROM mapped to PPU $0000 - $1FFF
+	//  My English is very poor!
+	// In theory, it should not exceed 48K,I hope Fceux can improve the support for nes 2.0
+	if (PRGsize[0] >= 64 * 1024)
+	{
+		SetupCartCHRMapping(0x00, &PRGptr[0][0xC000], 0x2000, 0);
+		// this is hack..... fceux seems to have an error reading PRG settings
+		// not modify fceux other code,
+		// fceux load prg is 64k, have 8k chr in 0xC000
+		// fceux load chr is 8k,but 0xFF or 0x00
+	}
+
+	SetReadHandler(0x4020, 0xFFFF, M474ReadCart);
+	M474Sync();
+}
+
+
+
+void Mapper474_Init(CartInfo* info) {
+	info->Power = M474Power;
+	subMapper = info->submapper;
+
+	for (int i = 0; i < 0x1000; i++) {
+		defapuread[i] = GetReadHandler(0x4000 | i);
+	}
+}
