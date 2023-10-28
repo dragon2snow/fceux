@@ -186,6 +186,7 @@ void Mapper117_Init(CartInfo *);
 void Mapper119_Init(CartInfo *);
 void Mapper120_Init(CartInfo *);
 void Mapper121_Init(CartInfo *);
+void SuperGM3_Init(CartInfo *);
 void Mapper125_Init(CartInfo *);
 void Mapper134_Init(CartInfo *);
 void Mapper140_Init(CartInfo *);

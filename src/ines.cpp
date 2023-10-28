@@ -515,7 +515,7 @@ static int not_power2[] =
 };
 
 BMAPPINGLocal bmap[] = {
-	{"NROM",				  0, NROM_Init},
+	{"NROM",				  0, SSSNROM_Init},
 	{"MMC1",				  1, Mapper1_Init},
 	{"UNROM",				  2, UNROM_Init},
 	{"CNROM",				  3, CNROM_Init},
@@ -640,6 +640,7 @@ BMAPPINGLocal bmap[] = {
 //	{"",					122, Mapper122_Init},
 	{"MMC3 PIRATE H2288",	123, UNLH2288_Init},
 //	{"",					124, Mapper124_Init},
+	{ "",					124, SuperGM3_Init },
 	{"FDS LH32",			125, LH32_Init},
 //	{"",					126, Mapper126_Init},
 //	{"",					127, Mapper127_Init},
@@ -950,8 +951,14 @@ int iNESLoad(const char *name, FCEUFILE *fp, int OverwriteVidMode) {
 
 	FCEU_fread(ROM, 0x4000, (round) ? ROM_size : not_round_size, fp);
 
-	if (VROM_size)
+	if (VROM_size) {
+		if (ROM_size > not_round_size)
+		{
+			FCEU_fseek(fp, (not_round_size<<14) + 16, SEEK_SET);
+		}
 		FCEU_fread(VROM, 0x2000, VROM_size, fp);
+	}
+		
 
 	md5_starts(&md5); 
 	md5_update(&md5, ROM, ROM_size << 14);
