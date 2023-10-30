@@ -515,7 +515,7 @@ static int not_power2[] =
 };
 
 BMAPPINGLocal bmap[] = {
-	{"NROM",				  0, SSSNROM_Init},
+	{"NROM",				  0, NROM_Init},
 	{"MMC1",				  1, Mapper1_Init},
 	{"UNROM",				  2, UNROM_Init},
 	{"CNROM",				  3, CNROM_Init},
